@@ -1,11 +1,17 @@
+import 'dart:ui';
+
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_picker_dialog.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:whatsappclone/mediaQuery/size_helpers.dart';
+import 'package:whatsappclone/pages/verificationPage.dart';
+import 'package:whatsappclone/provider/appState.provider.dart';
 import 'package:whatsappclone/style/style.dart';
+import 'package:whatsappclone/widgets/loadingWidget.dart';
 
 class RegistrationPage extends StatefulWidget {
   static const routeName = '/registrationPage';
@@ -20,7 +26,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       CountryPickerUtils.getCountryByPhoneCode("92");
 
   String _countryCode = _selectedFilteredDialogCountry.phoneCode;
-  String _phoneNumber = "";
+  //String _phoneNumber = "";
 
   Widget _buildCountryPicked(Country country) {
     return Container(
@@ -28,7 +34,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: greenColor, width: 1),
+          bottom: BorderSide(
+            color: greenColor,
+            width: 1,
+          ),
         ),
       ),
       child: Row(
@@ -59,6 +68,39 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
+  progressDialogue(
+      BuildContext context, Widget? content, bool actionButtonAvailable) {
+    //set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      backgroundColor: whiteColor,
+      elevation: 0,
+      content: content,
+      actions: [
+        actionButtonAvailable
+            ? TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("OK"),
+              )
+            : SizedBox()
+      ],
+    );
+    showDialog(
+      //prevent outside touch
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        //prevent Back button press
+        return WillPopScope(
+            onWillPop: () {
+              return Future.value(false);
+            },
+            child: alert);
+      },
+    );
+  }
+
   Widget _buildDialogItem(Country country) {
     return Container(
         height: 40,
@@ -71,12 +113,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
         child: ListTile(
           leading: CircleAvatar(
             child: CountryPickerUtils.getDefaultFlagImage(country),
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.white,
+            backgroundColor: whiteColor,
+            foregroundColor: whiteColor,
           ),
           trailing: Text(
             "+${country.phoneCode}",
-            style: TextStyle(color: Colors.grey[800]),
+            style: TextStyle(color: darkgrey800),
           ),
           title: Text("${country.name}"),
         ));
@@ -92,7 +134,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
               child: CountryPickerDialog(
                 titlePadding: EdgeInsets.all(8.0),
-                searchCursorColor: Colors.black,
+                searchCursorColor: blackColor,
                 searchInputDecoration: InputDecoration(
                   hintText: "Search",
                 ),
@@ -161,30 +203,31 @@ class _RegistrationPageState extends State<RegistrationPage> {
         child: Column(
           children: [
             Container(
-                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(children: [
-                    TextSpan(
-                      text:
-                          'WhatsApp will send an SMS message to verify your phone Number. ',
-                      style: TextStyle(
-                          fontFamily: 'NimbusSanL',
-                          height: 1.4,
-                          color: blackColor),
-                    ),
-                    TextSpan(
-                      text: 'What\'s your number?',
-                      style: TextStyle(
+              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(children: [
+                  TextSpan(
+                    text:
+                        'WhatsApp will send an SMS message to verify your phone Number. ',
+                    style: TextStyle(
                         fontFamily: 'NimbusSanL',
                         height: 1.4,
-                        color: lightSeaBlue,
-                      ),
-                      //   recognizer: TapGestureRecognizer()
-                      // ..onTap = () => navigateToRegistration(context),
-                    )
-                  ]),
-                )),
+                        color: blackColor),
+                  ),
+                  TextSpan(
+                    text: 'What\'s your number?',
+                    style: TextStyle(
+                      fontFamily: 'NimbusSanL',
+                      height: 1.4,
+                      color: lightSeaBlue,
+                    ),
+                    //   recognizer: TapGestureRecognizer()
+                    // ..onTap = () => navigateToRegistration(context),
+                  )
+                ]),
+              ),
+            ),
             SizedBox(
               height: 30,
             ),
@@ -195,7 +238,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             Row(
               children: <Widget>[
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  margin: EdgeInsets.symmetric(horizontal: 17),
                   decoration: BoxDecoration(
                       border: Border(
                           bottom: BorderSide(
@@ -205,18 +248,23 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   width: 60,
                   height: 42,
                   alignment: Alignment.center,
-                  child: Text(" + ${_selectedFilteredDialogCountry.phoneCode}"),
+                  child: Text(
+                    "+ ${_selectedFilteredDialogCountry.phoneCode}",
+                  ),
                 ),
                 // SizedBox(
                 //   width: 5.0,
                 // ),
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 5),
+                    margin: EdgeInsets.only(right: 18),
                     height: 40,
-                    child: TextField(
+                    child: TextFormField(
                       controller: _phoneAuthController,
-                      decoration: InputDecoration(hintText: "Phone Number"),
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        hintText: "Phone Number",
+                      ),
                     ),
                   ),
                 ),
@@ -239,53 +287,85 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ],
             ),
             Container(
-                margin: EdgeInsets.symmetric(vertical: 40),
-                padding: EdgeInsets.only(
-                    top: 20,
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 10,
-                    left: 10,
-                    right: 10),
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(primary: darkPrimaryColor),
-                    onPressed: () async {
-                      FirebaseAuth auth = FirebaseAuth.instance;
-                      await auth.verifyPhoneNumber(
-                        phoneNumber: '+' +
-                            _selectedFilteredDialogCountry.phoneCode +
-                            _phoneAuthController.text,
-                        verificationCompleted:
-                            (PhoneAuthCredential credential) async {
-                          await auth.signInWithCredential(credential);
-                          print(credential);
-                        },
-                        verificationFailed: (FirebaseAuthException e) {
-                          if (e.code == 'invalid-phone-number') {
-                            print('The provided phone number is not valid.');
-                          }
-                        },
-                        codeSent:
-                            (String verificationId, int? resendToken) async {
-                          // Update the UI - wait for the user to enter the SMS code
-                          // String smsCode = 'xxxx';
+              margin: EdgeInsets.symmetric(vertical: 40),
+              padding: EdgeInsets.only(
+                  top: 20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+                  left: 10,
+                  right: 10),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: darkPrimaryColor),
+                onPressed: () async {
+                  //LoadingWidget();
+                  progressDialogue(
+                      context,
+                      ListTile(
+                        leading: CircularProgressIndicator(),
+                        title: Text('Connecting...'),
+                      ),
+                      false);
 
-                          // Create a PhoneAuthCredential with the code
-                          // PhoneAuthCredential credential =
-                          //     PhoneAuthProvider.credential(
-                          //         verificationId: verificationId,
-                          //         smsCode: smsCode);
-
-                          // Sign the user in (or link) with the credential
-                          //await auth.signInWithCredential(credential);
-                        },
-                        timeout: const Duration(seconds: 60),
-                        codeAutoRetrievalTimeout: (String verificationId) {},
-                      );
-                      print(_selectedFilteredDialogCountry.phoneCode);
-                      print(_phoneAuthController.text);
+                  //firebase verify phone number
+                  FirebaseAuth auth = FirebaseAuth.instance;
+                  await auth.verifyPhoneNumber(
+                    phoneNumber: '+' +
+                        _selectedFilteredDialogCountry.phoneCode +
+                        _phoneAuthController.text,
+                    verificationCompleted:
+                        (PhoneAuthCredential credential) async {
+                      await auth.signInWithCredential(credential);
+                      print('yes');
+                      print(credential);
                     },
-                    child: Text(
-                      'NEXT',
-                    )))
+                    verificationFailed: (FirebaseAuthException error) {
+                      //close alert loading dialog
+                      Navigator.pop(context);
+
+                      progressDialogue(
+                          context,
+                          ListTile(
+                            leading: null,
+                            title: Text(error.message.toString()),
+                          ),
+                          true);
+
+                      // if (e.code == 'invalid-phone-number') {
+                      //   print('The provided phone number is not valid.');
+                      // }
+                    },
+                    codeSent: (String verificationId, int? resendToken) async {
+                      print('yes2');
+                      print(verificationId);
+                      print(resendToken);
+
+                      //initilaize verfication ID
+                      Provider.of<AppState>(context, listen: false)
+                          .setVerficationID(verificationId);
+
+                      //close alert loading dialog
+                      Navigator.pop(context);
+
+                      //Navigate to enter pinCode
+                      Navigator.of(context)
+                          .pushNamed(VerificationPage.routeName);
+                    },
+                    timeout: const Duration(seconds: 60),
+                    codeAutoRetrievalTimeout: (String verificationId) {},
+                  );
+                  // print(_selectedFilteredDialogCountry.phoneCode);
+                  // print(_phoneAuthController.text);
+
+                  //initilialize country code with phone number entered
+                  Provider.of<AppState>(context, listen: false)
+                      .setUserPhoneNumber(
+                          _selectedFilteredDialogCountry.phoneCode +
+                              _phoneAuthController.text);
+                },
+                child: Text(
+                  'NEXT',
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -12,3 +12,4 @@ final Color? whiteColor = Colors.white;
 final Color? black45 = Colors.black45;
 final Color? blackColor = Colors.black;
 final Color? lightSeaBlue = Colors.blueAccent;
+final Color? darkgrey800 = Colors.grey[800];

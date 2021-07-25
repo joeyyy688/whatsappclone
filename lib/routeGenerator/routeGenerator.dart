@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:whatsappclone/pages/registrationPage.dart';
-import 'package:whatsappclone/pages/welcomePage.dart';
+import 'package:whatsappclone/pages/verificationPage.dart';
+//import 'package:whatsappclone/pages/welcomePage.dart';
 import 'package:whatsappclone/routeGenerator/routeErrorPage.dart';
 
 class RouteGenerator {
@@ -12,6 +13,10 @@ class RouteGenerator {
       case RegistrationPage.routeName:
         return MaterialPageRoute(
           builder: (context) => RegistrationPage(),
+        );
+      case VerificationPage.routeName:
+        return MaterialPageRoute(
+          builder: (context) => VerificationPage(),
         );
       default:
         _errorRoute();
