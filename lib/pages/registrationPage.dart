@@ -8,10 +8,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whatsappclone/mediaQuery/size_helpers.dart';
+import 'package:whatsappclone/pages/homePage.dart';
 import 'package:whatsappclone/pages/verificationPage.dart';
 import 'package:whatsappclone/provider/appState.provider.dart';
 import 'package:whatsappclone/style/style.dart';
-import 'package:whatsappclone/widgets/loadingWidget.dart';
+
+import 'whatsappHomePage.dart';
 
 class RegistrationPage extends StatefulWidget {
   static const routeName = '/registrationPage';
@@ -84,6 +86,72 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 child: Text("OK"),
               )
             : SizedBox()
+      ],
+    );
+    showDialog(
+      //prevent outside touch
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        //prevent Back button press
+        return WillPopScope(
+            onWillPop: () {
+              return Future.value(false);
+            },
+            child: alert);
+      },
+    );
+  }
+
+  continuationDialog(BuildContext context, String phoneNumber,
+      void Function()? continuationFunction) {
+    //set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      backgroundColor: whiteColor,
+      elevation: 0,
+      content: RichText(
+        textAlign: TextAlign.left,
+        text: TextSpan(children: [
+          TextSpan(
+            text: 'You entered the phone number: \n \n',
+            style: TextStyle(
+                fontFamily: 'NimbusSanL', height: 1.4, color: blackColor),
+          ),
+          TextSpan(
+            text: '$phoneNumber \n \n',
+            style: TextStyle(
+              fontFamily: 'NimbusSanL',
+              height: 1.4,
+              fontWeight: FontWeight.w700,
+              color: blackColor,
+            ),
+          ),
+          TextSpan(
+            text: 'Is this OK, or would you like to edit the number?',
+            style: TextStyle(
+              fontFamily: 'NimbusSanL',
+              //height: 1.4,
+              color: blackColor,
+            ),
+          ),
+        ]),
+      ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("EDIT"),
+            ),
+            TextButton(
+              onPressed: continuationFunction,
+              child: Text("OK"),
+            )
+          ],
+        ),
       ],
     );
     showDialog(
@@ -268,22 +336,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   ),
                 ),
-                // Expanded(
-                //   child: Align(
-                //     alignment: Alignment.bottomCenter,
-                //     child: MaterialButton(
-                //       color: greenColor,
-                //       onPressed: () {},
-                //       child: Text(
-                //         "Next",
-                //         style: TextStyle(
-                //           fontSize: 18,
-                //           color: Colors.white,
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // )
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: MaterialButton(
+                      color: lightSeaBlue,
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed(WhatsAppHomePage.routeName);
+                      },
+                      child: Text(
+                        "Test Page",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
             Container(
@@ -297,69 +368,98 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 style: ElevatedButton.styleFrom(primary: darkPrimaryColor),
                 onPressed: () async {
                   //LoadingWidget();
-                  progressDialogue(
-                      context,
-                      ListTile(
-                        leading: CircularProgressIndicator(),
-                        title: Text('Connecting...'),
-                      ),
-                      false);
+                  print(_selectedFilteredDialogCountry.phoneCode +
+                      _phoneAuthController.text);
 
-                  //firebase verify phone number
-                  FirebaseAuth auth = FirebaseAuth.instance;
-                  await auth.verifyPhoneNumber(
-                    phoneNumber: '+' +
-                        _selectedFilteredDialogCountry.phoneCode +
-                        _phoneAuthController.text,
-                    verificationCompleted:
-                        (PhoneAuthCredential credential) async {
-                      await auth.signInWithCredential(credential);
-                      print('yes');
-                      print(credential);
-                    },
-                    verificationFailed: (FirebaseAuthException error) {
-                      //close alert loading dialog
-                      Navigator.pop(context);
-
-                      progressDialogue(
-                          context,
-                          ListTile(
-                            leading: null,
-                            title: Text(error.message.toString()),
+                  if (_phoneAuthController.text.length == 0) {
+                    progressDialogue(
+                        context,
+                        ListTile(
+                          leading: null,
+                          title: Text(
+                            "Please enter your phone number",
+                            textAlign: TextAlign.left,
                           ),
-                          true);
+                        ),
+                        true);
+                    return;
+                  }
 
-                      // if (e.code == 'invalid-phone-number') {
-                      //   print('The provided phone number is not valid.');
-                      // }
-                    },
-                    codeSent: (String verificationId, int? resendToken) async {
-                      print('yes2');
-                      print(verificationId);
-                      print(resendToken);
-
-                      //initilaize verfication ID
-                      Provider.of<AppState>(context, listen: false)
-                          .setVerficationID(verificationId);
-
-                      //close alert loading dialog
-                      Navigator.pop(context);
-
-                      //Navigate to enter pinCode
-                      Navigator.of(context)
-                          .pushNamed(VerificationPage.routeName);
-                    },
-                    timeout: const Duration(seconds: 60),
-                    codeAutoRetrievalTimeout: (String verificationId) {},
-                  );
-                  // print(_selectedFilteredDialogCountry.phoneCode);
-                  // print(_phoneAuthController.text);
-
-                  //initilialize country code with phone number entered
-                  Provider.of<AppState>(context, listen: false)
-                      .setUserPhoneNumber(
+                  continuationDialog(
+                      context,
+                      '+' +
                           _selectedFilteredDialogCountry.phoneCode +
-                              _phoneAuthController.text);
+                          _phoneAuthController.text, () async {
+                    Navigator.of(context).pop();
+
+                    //Loading screen
+                    progressDialogue(
+                        context,
+                        ListTile(
+                          leading: CircularProgressIndicator(),
+                          title: Text('Connecting...'),
+                        ),
+                        false);
+
+                    //firebase verify phone number
+                    FirebaseAuth auth = FirebaseAuth.instance;
+                    await auth.verifyPhoneNumber(
+                      phoneNumber: '+' +
+                          _selectedFilteredDialogCountry.phoneCode +
+                          _phoneAuthController.text,
+                      verificationCompleted:
+                          (PhoneAuthCredential credential) async {
+                        await auth.signInWithCredential(credential);
+                        print('yes');
+                        print(credential);
+                      },
+                      verificationFailed: (FirebaseAuthException error) {
+                        //close alert loading dialog
+                        Navigator.pop(context);
+
+                        progressDialogue(
+                            context,
+                            ListTile(
+                              leading: null,
+                              title: Text(error.message.toString()),
+                            ),
+                            true);
+
+                        // if (e.code == 'invalid-phone-number') {
+                        //   print('The provided phone number is not valid.');
+                        // }
+                      },
+                      codeSent:
+                          (String verificationId, int? resendToken) async {
+                        print('yes2');
+                        print(verificationId);
+                        print(resendToken);
+
+                        //initilaize verfication ID
+                        Provider.of<AppState>(context, listen: false)
+                            .setVerficationID(verificationId);
+
+                        //close alert loading dialog
+                        Navigator.pop(context);
+
+                        //Navigate to enter pinCode
+                        Navigator.of(context)
+                            .pushNamed(VerificationPage.routeName);
+                      },
+                      timeout: const Duration(seconds: 10),
+                      codeAutoRetrievalTimeout: (String verificationId) {
+                        print(verificationId);
+                      },
+                    );
+                    // print(_selectedFilteredDialogCountry.phoneCode);
+                    // print(_phoneAuthController.text);
+
+                    //initilialize country code with phone number entered
+                    Provider.of<AppState>(context, listen: false)
+                        .setUserPhoneNumber(
+                            _selectedFilteredDialogCountry.phoneCode +
+                                _phoneAuthController.text);
+                  });
                 },
                 child: Text(
                   'NEXT',
