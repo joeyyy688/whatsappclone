@@ -16,12 +16,32 @@ class WhatsAppHomePage extends StatefulWidget {
 class _WhatsAppHomePageState extends State<WhatsAppHomePage>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
+  Icon fabIcon = Icon(Icons.chat);
 
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 4);
+    _tabController!.animation!.addStatusListener((status) {
+      print(status);
+      print(status);
+    });
+    _tabController!.animation!.addListener(() {});
     _tabController!.addListener(() {
+      //i'll be back
       print("${_tabController!.index}");
+      if (_tabController!.index == 2) {
+        setState(() {
+          fabIcon = Icon(Icons.camera_alt_sharp);
+        });
+      } else if (_tabController!.index == 1) {
+        setState(() {
+          fabIcon = Icon(Icons.chat);
+        });
+      } else if (_tabController!.index == 3) {
+        setState(() {
+          fabIcon = Icon(Icons.add_call);
+        });
+      }
     });
   }
 
@@ -45,6 +65,9 @@ class _WhatsAppHomePageState extends State<WhatsAppHomePage>
             bottom: TabBar(
               isScrollable: true,
               controller: _tabController,
+              indicatorSize: TabBarIndicatorSize.label,
+              indicatorColor: Colors.white,
+              labelPadding: EdgeInsets.symmetric(horizontal: 24.6),
               tabs: [
                 Tab(icon: Icon(Icons.camera_alt)),
                 Tab(
@@ -81,12 +104,7 @@ class _WhatsAppHomePageState extends State<WhatsAppHomePage>
             ],
           ),
           floatingActionButton: FloatingActionButton(
-            backgroundColor: greenColor,
-            onPressed: () {},
-            child: Icon(
-              Icons.chat,
-            ),
-          ),
+              backgroundColor: greenColor, onPressed: () {}, child: fabIcon),
         ),
       ),
     );
