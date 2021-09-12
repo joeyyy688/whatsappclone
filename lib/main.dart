@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:whatsappclone/pages/welcomePage.dart';
-import 'package:whatsappclone/provider/appState.provider.dart';
+import 'package:whatsappclone/provider/appStateProvider.dart';
 import 'package:whatsappclone/routeGenerator/routeGenerator.dart';
 import 'package:whatsappclone/style/style.dart';
 
 Future<void> main() async {
+  // Ensure that plugin services are initialized so that `availableCameras()`
+  // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(
     MultiProvider(
       providers: [
@@ -26,7 +29,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WhatsApp Clone',
-      theme: ThemeData(primaryColor: primaryColor),
+      theme: ThemeData(
+        primaryColor: primaryColor,
+        canvasColor: Colors.transparent,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       supportedLocales: [
         Locale("af"),
         Locale("am"),

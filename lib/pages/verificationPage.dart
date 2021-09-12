@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whatsappclone/mediaQuery/size_helpers.dart';
-import 'package:whatsappclone/provider/appState.provider.dart';
+import 'package:whatsappclone/provider/appStateProvider.dart';
 import 'package:whatsappclone/style/style.dart';
 import 'package:whatsappclone/widgets/verificationForm.dart';
 

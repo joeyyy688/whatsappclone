@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:camera/camera.dart';
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_picker_dialog.dart';
 import 'package:country_pickers/country_pickers.dart';
@@ -10,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:whatsappclone/mediaQuery/size_helpers.dart';
 import 'package:whatsappclone/pages/homePage.dart';
 import 'package:whatsappclone/pages/verificationPage.dart';
-import 'package:whatsappclone/provider/appState.provider.dart';
+import 'package:whatsappclone/provider/appStateProvider.dart';
 import 'package:whatsappclone/style/style.dart';
 
 import 'whatsappHomePage.dart';
@@ -29,6 +30,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   String _countryCode = _selectedFilteredDialogCountry.phoneCode;
   //String _phoneNumber = "";
+  //late CameraController _controller;
 
   Widget _buildCountryPicked(Country country) {
     return Container(
@@ -220,6 +222,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    //_controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -341,7 +350,24 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     alignment: Alignment.bottomCenter,
                     child: MaterialButton(
                       color: lightSeaBlue,
-                      onPressed: () {
+                      onPressed: () async {
+                        final appStateData =
+                            Provider.of<AppState>(context, listen: false);
+
+                        // Obtain a list of the available cameras on the device.
+                        final cameras = await availableCameras();
+
+                        // Assign all available cameras to the variable
+                        List<CameraDescription> availableDeviceCameras =
+                            cameras;
+
+                        appStateData.initializeAvailableCameras(
+                            cameras: availableDeviceCameras);
+
+                        appStateData.initializeCameraController(
+                            appStateData.selectedCamera);
+
+                        appStateData.initializeCameraControllerFutures();
                         Navigator.of(context)
                             .pushNamed(WhatsAppHomePage.routeName);
                       },
