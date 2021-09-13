@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class AppState with ChangeNotifier {
   String? userPhoneNumber;
@@ -8,6 +9,7 @@ class AppState with ChangeNotifier {
   int selectedCamera = 0;
   late CameraController cameraController;
   late Future<void> initializeControllerFuture;
+  late Icon flashLightIcon = Icon(Icons.flash_on_rounded);
 
   void setUserPhoneNumber(String phoneNumber) {
     this.userPhoneNumber = phoneNumber;
@@ -40,6 +42,24 @@ class AppState with ChangeNotifier {
 
   void changeSelectedCameraValue(int value) {
     this.selectedCamera = value;
+    notifyListeners();
+  }
+
+  void setFlashLightModeAlwaysOn() {
+    this.cameraController.setFlashMode(FlashMode.always);
+    flashLightIcon = Icon(Icons.flash_on_rounded);
+    notifyListeners();
+  }
+
+  void setFlashLightModeAuto() {
+    this.cameraController.setFlashMode(FlashMode.auto);
+    flashLightIcon = Icon(Icons.flash_auto_rounded);
+    notifyListeners();
+  }
+
+  void setFlashLightModeOff() {
+    this.cameraController.setFlashMode(FlashMode.off);
+    flashLightIcon = Icon(Icons.flash_off_rounded);
     notifyListeners();
   }
 }
