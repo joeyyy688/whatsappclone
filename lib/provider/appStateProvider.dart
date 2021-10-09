@@ -31,7 +31,7 @@ class AppState with ChangeNotifier {
   initializeCameraController(int cameraValue) {
     this.cameraController = CameraController(
       this.cameras[cameraValue],
-      ResolutionPreset.ultraHigh,
+      ResolutionPreset.medium,
     );
     notifyListeners();
   }

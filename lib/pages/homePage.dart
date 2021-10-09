@@ -26,6 +26,19 @@ class _WhatsAppHomePageState extends State<WhatsAppHomePage>
   bool _isAppBarVisible = true;
   late final AnimationController _controller;
 
+  void changeFabValue(
+      {Icon? fabIcon,
+      required bool fabVisibility,
+      required bool appBarVisibility,
+      required WhatsAppTab currentTab}) {
+    setState(() {
+      _fabIcon = fabIcon!;
+      _isFabVisible = fabVisibility;
+      _isAppBarVisible = appBarVisibility;
+      _currentViewingTab = currentTab;
+    });
+  }
+
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 4, initialIndex: 1);
@@ -33,46 +46,36 @@ class _WhatsAppHomePageState extends State<WhatsAppHomePage>
       vsync: this,
       duration: Duration(milliseconds: 392),
     );
-    // _tabController!.animation!.addStatusListener((status) {
-    //   print(status);
-    //   print(status);
-    // });
 
     _tabController!.animation!.addListener(() {
-      if (_tabController!.animation!.value != _tabController!.index) {
-        {
-          if (_tabController!.animation!.value.round() == 1) {
-            setState(() {
-              _fabIcon = Icon(Icons.chat);
-              _isFabVisible = true;
-              _isAppBarVisible = true;
-              _currentViewingTab = WhatsAppTab.Chats;
-            });
-          } else if (_tabController!.animation!.value.round() == 2) {
-            setState(() {
-              _fabIcon = Icon(Icons.camera_alt_sharp);
-              _isFabVisible = true;
-              _isAppBarVisible = true;
-              _currentViewingTab = WhatsAppTab.Status;
-            });
-          } else if (_tabController!.animation!.value.round() == 3) {
-            setState(() {
-              _fabIcon = Icon(Icons.add_call);
-              _isFabVisible = true;
-              _isAppBarVisible = true;
-              _currentViewingTab = WhatsAppTab.Calls;
-            });
-          } else {
-            setState(() {
-              _isFabVisible = false;
-              _isAppBarVisible = false;
-              _currentViewingTab = WhatsAppTab.Camera;
-            });
-          }
-        }
+      if (_tabController!.animation!.value.round() == 1) {
+        changeFabValue(
+            appBarVisibility: true,
+            currentTab: WhatsAppTab.Chats,
+            fabIcon: Icon(Icons.chat),
+            fabVisibility: true);
+      } else if (_tabController!.animation!.value.round() == 2) {
+        changeFabValue(
+            appBarVisibility: true,
+            currentTab: WhatsAppTab.Status,
+            fabIcon: Icon(Icons.camera_alt_sharp),
+            fabVisibility: true);
+      } else if (_tabController!.animation!.value.round() == 3) {
+        changeFabValue(
+            fabIcon: Icon(Icons.add_call),
+            appBarVisibility: true,
+            currentTab: WhatsAppTab.Calls,
+            fabVisibility: true);
+      } else {
+        changeFabValue(
+            fabIcon: Icon(Icons.add_call),
+            appBarVisibility: false,
+            currentTab: WhatsAppTab.Camera,
+            fabVisibility: false);
       }
     });
-    _tabController!.addListener(() {});
+
+    //_tabController!.addListener(() {});
   }
 
   @override
